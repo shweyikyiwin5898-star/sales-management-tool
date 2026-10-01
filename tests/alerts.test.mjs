@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { alertFor, seedCustomers, shiftDate } from '../lib/data.ts';
+const today='2026-10-02';
+const base={...seedCustomers(today)[0],pendingReply:false,lastContact:'2026-10-01',nextDate:'2026-10-10'};
+test('pending reply takes precedence over overdue and today contact',()=>assert.equal(alertFor({...base,pendingReply:true,lastContact:today,nextDate:'2026-10-01'},today).key,'reply'));
+test('overdue is red even after contact until follow-up is rescheduled',()=>assert.equal(alertFor({...base,lastContact:today,nextDate:'2026-10-01'},today).key,'overdue'));
+test('today and tomorrow are due; two days ahead is normal',()=>{assert.equal(alertFor({...base,nextDate:today},today).key,'due');assert.equal(alertFor({...base,nextDate:shiftDate(today,1)},today).key,'due');assert.equal(alertFor({...base,nextDate:shiftDate(today,2)},today).key,'normal');});
+test('14-day inactivity boundary',()=>{assert.equal(alertFor({...base,lastContact:shiftDate(today,-14)},today).key,'due');assert.equal(alertFor({...base,lastContact:shiftDate(today,-13)},today).key,'normal');});
+test('today contact with future follow-up is done',()=>assert.equal(alertFor({...base,lastContact:today},today).key,'done'));
+test('date arithmetic spans month and year boundaries',()=>{assert.equal(shiftDate('2026-12-31',1),'2027-01-01');assert.equal(shiftDate('2026-03-01',-1),'2026-02-28');});
+test('demo data has 25 unique customers split into 20 and 5',()=>{const cs=seedCustomers(today);assert.equal(new Set(cs.map(c=>c.id)).size,25);assert.equal(cs.filter(c=>c.store==='ginza').length,20);assert.equal(cs.filter(c=>c.store==='osaka').length,5);});
