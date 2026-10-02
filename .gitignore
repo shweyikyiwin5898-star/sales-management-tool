@@ -4,3 +4,7 @@ out/
 .vercel/
 .env*
 *.tsbuildinfo
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

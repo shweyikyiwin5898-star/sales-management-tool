@@ -1,3 +1,4 @@
+-- Python版にも未接続。スタッフUUID、商品配列、翻訳辞書への変換は移行実装時に必要。
 -- MAISON: 将来の移行用スキーマ案。現行アプリはlocalStorageを使用。
 -- 未投入・未実機検証。DB接続・認証・公開APIは別途実装が必要。
 -- 新規のデモ用DBで管理者としてレビュー後に実行するための資料。
@@ -25,7 +26,7 @@ create table maison_demo.customers (
   size text not null default '',
   tier text not null default 'Regular' check (tier in ('Regular', 'VIC')),
   interests text[] not null default '{}',
-  stage text not null default '来店' check (stage in ('来店','商品提案','検討中','再来店','購入','購入後フォロー')),
+  stage text not null default 'visit' check (stage in ('visit','proposal','considering','return','purchased','aftercare')),
   next_date date not null,
   note text not null default '',
   purchase text not null default '',
@@ -36,7 +37,7 @@ create table maison_demo.activities (
   id uuid primary key default gen_random_uuid(),
   customer_id uuid not null references maison_demo.customers(id),
   date date not null,
-  type text not null check (type in ('送信','受信','接客','メモ')),
+  type text not null check (type in ('sent','received','meeting','memo')),
   body text not null check (length(trim(body)) between 1 and 2000),
   created_at timestamptz not null default now()
 );
